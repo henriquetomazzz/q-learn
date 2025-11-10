@@ -41,15 +41,18 @@ q_agent2 = np.zeros((GRID_SIZE, GRID_SIZE, len(ACTIONS)))
 
 # Funções auxiliares
 def is_valid(pos):
+    # Verifica se a posição é válida(dentro da grade e sem obstáculos).
     x, y = pos
     return 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE and pos not in OBSTACLES
 
 def get_next_state(state, action):
+    # Retorna o próximo estado após executar uma ação.
     dx, dy = ACTIONS[action]
     next_state = (state[0] + dx, state[1] + dy)
     return next_state if is_valid(next_state) else state
 
 def get_reward(state):
+    # Define as recompensas do ambiente.
     if state == GOAL:
         return 100
     elif state in OBSTACLES:
@@ -58,6 +61,7 @@ def get_reward(state):
         return -2
 
 def draw_grid(screen):
+    # Desenha a grade, os obstáculos, o início e o objetivo.
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
             rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
@@ -72,6 +76,7 @@ def draw_grid(screen):
             pygame.draw.rect(screen, GREY, rect, 1)
 
 def draw_agent(screen, pos, color):
+    # Desenha um agente em sua posição atual.
     rect = pygame.Rect(pos[0] * CELL_SIZE + 10, pos[1] * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20)
     pygame.draw.ellipse(screen, color, rect)
 
@@ -81,9 +86,8 @@ def process_events():
             pygame.quit()
             exit()
 
-# -------------------------------------------
+
 # Treinamento com dois agentes
-# -------------------------------------------
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Treinamento: Corrida de Dois Agentes")
@@ -98,7 +102,7 @@ for episode in range(EPISODES):
     for step in range(MAX_STEPS):
         process_events()
 
-        # Escolher ação para cada agente
+        # Escolhe ação para cada agente
         action1 = random.randint(0, 3) if random.random() < EPSILON else np.argmax(q_agent1[state1[0], state1[1]])
         action2 = random.randint(0, 3) if random.random() < EPSILON else np.argmax(q_agent2[state2[0], state2[1]])
 
@@ -114,10 +118,10 @@ for episode in range(EPISODES):
         q_agent1[state1[0], state1[1], action1] += ALPHA * (reward1 + GAMMA * np.max(q_agent1[next1[0], next1[1]]) - q_agent1[state1[0], state1[1], action1])
         q_agent2[state2[0], state2[1], action2] += ALPHA * (reward2 + GAMMA * np.max(q_agent2[next2[0], next2[1]]) - q_agent2[state2[0], state2[1], action2])
 
-        # Atualizar posições
+        # Atualiza posições
         state1, state2 = next1, next2
 
-        # Verificar vencedor
+        # Verifica vencedor
         if state1 == GOAL:
             winner = "Agente Azul"
             break
@@ -143,9 +147,8 @@ print("Treinamento concluído!")
 time.sleep(1)
 pygame.display.quit()
 
-# -------------------------------------------
 # Execução dos agentes treinados (corrida final)
-# -------------------------------------------
+
 pygame.display.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Corrida Final dos Agentes Treinados")
